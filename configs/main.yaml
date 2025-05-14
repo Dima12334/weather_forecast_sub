@@ -1,0 +1,6 @@
+http_server:
+  host: http://localhost
+  port: 8080
+
+db:
+  migrationsPath: "file://migrations"
