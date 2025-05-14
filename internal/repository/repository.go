@@ -13,7 +13,7 @@ type UpdateSubscriptionInput struct {
 }
 
 type SubscriptionRepository interface {
-	Create(ctx context.Context, user domain.Subscription) error
+	Create(ctx context.Context, subscription domain.Subscription) error
 	GetByToken(ctx context.Context, token string) (domain.Subscription, error)
 	Update(ctx context.Context, inp UpdateSubscriptionInput) error
 	Delete(ctx context.Context, token string) error

@@ -15,6 +15,7 @@ import (
 	"weather_forecast_sub/internal/repository"
 	"weather_forecast_sub/internal/server"
 	"weather_forecast_sub/internal/service"
+	"weather_forecast_sub/pkg/hash"
 	"weather_forecast_sub/pkg/logger"
 )
 
@@ -43,10 +44,13 @@ func Run(configDir string) {
 		}
 	}()
 
+	hasher := hash.NewSHA256Hasher()
+
 	repositories := repository.NewRepositories(dbConn)
 	services := service.NewServices(
 		service.Deps{
-			Repos: repositories,
+			Repos:  repositories,
+			Hasher: hasher,
 		},
 	)
 	handler := handlers.NewHandler(services)
