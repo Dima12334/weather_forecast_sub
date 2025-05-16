@@ -9,7 +9,7 @@ import (
 )
 
 type subscribeEmailInput struct {
-	Email     string `json:"email" binding:"required,max=255"`
+	Email     string `json:"email" binding:"required,email,max=255"`
 	City      string `json:"city" binding:"required,max=255"`
 	Frequency string `json:"frequency" binding:"oneof=hourly daily"`
 }
