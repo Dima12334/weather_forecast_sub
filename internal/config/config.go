@@ -15,14 +15,19 @@ const (
 
 type (
 	Config struct {
-		HTTP   HTTPConfig
-		Logger LoggerConfig
-		DB     DatabaseConfig
+		HTTP       HTTPConfig
+		Logger     LoggerConfig
+		DB         DatabaseConfig
+		ThirdParty ThirdPartyConfig
 	}
 
 	HTTPConfig struct {
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
+	}
+
+	ThirdPartyConfig struct {
+		WeatherAPIKey string
 	}
 
 	LoggerConfig struct {
@@ -96,6 +101,8 @@ func setFormEnv(cfg *Config) {
 	}
 
 	cfg.Logger.LoggerEnv = os.Getenv("LOGG_ENV")
+
+	cfg.ThirdParty.WeatherAPIKey = os.Getenv("WEATHER_API_KEY")
 
 	cfg.DB.Host = os.Getenv("DB_HOST")
 	cfg.DB.Port = os.Getenv("DB_PORT")

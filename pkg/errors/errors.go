@@ -8,6 +8,8 @@ import (
 var (
 	ErrSubscriptionNotFound      = errors.New("subscription doesn't exists")
 	ErrSubscriptionAlreadyExists = errors.New("subscription with such email already exists")
+	ErrCityNotFound              = errors.New("city doesn't exists")
+	ErrWeatherAPIError           = errors.New("failed to get weather data")
 )
 
 func IsDuplicateDBError(err error) bool {
