@@ -20,6 +20,19 @@ import (
 	"weather_forecast_sub/pkg/logger"
 )
 
+// @title Weather Forecast API
+// @version 1.0
+// @description Weather API application that allows users to subscribe to weather updates for their city.
+// @host weatherapi.app
+// @BasePath /api
+// @schemes http https
+
+// @tag.name weather
+// @tag.description Weather forecast operations
+
+// @tag.name subscription
+// @tag.description Subscription management operations
+
 // Run initializes the whole application.
 func Run(configDir string) {
 	cfg, err := config.Init(configDir)

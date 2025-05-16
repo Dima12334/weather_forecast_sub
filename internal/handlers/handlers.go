@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"weather_forecast_sub/internal/service"
+
+	_ "weather_forecast_sub/docs"
 )
 
 type Handler struct {
@@ -23,16 +27,20 @@ func (h *Handler) Init() *gin.Engine {
 		c.String(http.StatusOK, "pong")
 	})
 
+	// Swagger docs
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	h.initApi(router)
 
 	return router
 }
 
 func (h *Handler) initApi(router *gin.Engine) {
+	router.GET("/subscribe", h.showSubscribePage)
+
 	api := router.Group("/api")
 	{
 		api.GET("/weather", h.getWeather)
-		api.GET("/subscribe", h.showSubscribePage)
 		api.POST("/subscribe", h.subscribeEmail)
 		api.GET("/confirm/:token", h.confirmEmail)
 		api.GET("/unsubscribe/:token", h.unsubscribeEmail)

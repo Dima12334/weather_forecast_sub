@@ -18,6 +18,20 @@ func (h *Handler) showSubscribePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "subscribe.html", gin.H{})
 }
 
+// subscribeEmail godoc
+// @Summary Subscribe to weather updates
+// @Description Subscribe an email to receive weather updates for a specific city with chosen frequency.
+// @Tags subscription
+// @Accept  json
+// @Accept  x-www-form-urlencoded
+// @Produce json
+// @Param email formData string true "Email address to subscribe"
+// @Param city formData string true "City for weather updates"
+// @Param frequency formData string true "Frequency of updates (hourly or daily)" Enums(hourly, daily)
+// @Success 200 "Subscription successful. Confirmation email sent."
+// @Failure 400 "Invalid input"
+// @Failure 409 "Email already subscribed"
+// @Router /subscribe [post]
 func (h *Handler) subscribeEmail(c *gin.Context) {
 	var inp subscribeEmailInput
 
@@ -47,6 +61,17 @@ func (h *Handler) subscribeEmail(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// confirmEmail godoc
+// @Summary Confirm email subscription
+// @Description Confirms a subscription using the token sent in the confirmation email.
+// @Tags subscription
+// @Accept json
+// @Produce json
+// @Param token path string true "Confirmation token"
+// @Success 200 "Subscription confirmed successfully"
+// @Failure 400 "Invalid token"
+// @Failure 404 "Token not found"
+// @Router /confirm/{token} [get]
 func (h *Handler) confirmEmail(c *gin.Context) {
 	token := c.Param("token")
 
@@ -64,6 +89,17 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// unsubscribeEmail godoc
+// @Summary Unsubscribe from weather updates
+// @Description Unsubscribes an email from weather updates using the token sent in emails.
+// @Tags subscription
+// @Accept json
+// @Produce json
+// @Param token path string true "Unsubscribe token"
+// @Success 200 "Unsubscribed successfully"
+// @Failure 400 "Invalid token"
+// @Failure 404 "Token not found"
+// @Router /unsubscribe/{token} [get]
 func (h *Handler) unsubscribeEmail(c *gin.Context) {
 	token := c.Param("token")
 

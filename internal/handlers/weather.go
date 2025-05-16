@@ -8,6 +8,23 @@ import (
 	customErrors "weather_forecast_sub/pkg/errors"
 )
 
+type weatherResponse struct {
+	Temperature float32 `json:"temperature"`
+	Humidity    float32 `json:"humidity"`
+	Description string  `json:"description"`
+}
+
+// getWeather godoc
+// @Summary Get current weather for a city
+// @Description Returns the current weather forecast for the specified city using WeatherAPI.com.
+// @Tags weather
+// @Accept json
+// @Produce json
+// @Param city query string true "City name for weather forecast"
+// @Success 200 {object} weatherResponse
+// @Failure 400 "Invalid request"
+// @Failure 404 "City not found"
+// @Router /weather [get]
 func (h *Handler) getWeather(c *gin.Context) {
 	city := c.Query("city")
 	if city == "" {
@@ -27,5 +44,5 @@ func (h *Handler) getWeather(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, weather)
+	c.JSON(http.StatusOK, weatherResponse(*weather))
 }
