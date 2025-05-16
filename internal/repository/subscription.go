@@ -2,7 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/jmoiron/sqlx"
+	"time"
 	"weather_forecast_sub/internal/domain"
 	customErrors "weather_forecast_sub/pkg/errors"
 )
@@ -19,7 +22,7 @@ func (r *SubscriptionRepo) Create(ctx context.Context, subscription domain.Subsc
 	query := `
 		INSERT INTO subscriptions (created_at, email, city, token, frequency, confirmed, last_sent_at) 
 		values ($1, $2, $3, $4, $5, $6, $7);`
-	_, err := r.db.QueryxContext(
+	_, err := r.db.ExecContext(
 		ctx,
 		query,
 		subscription.CreatedAt,
@@ -39,13 +42,47 @@ func (r *SubscriptionRepo) Create(ctx context.Context, subscription domain.Subsc
 }
 
 func (r *SubscriptionRepo) GetByToken(ctx context.Context, token string) (domain.Subscription, error) {
-	return domain.Subscription{}, nil
+	var subscription domain.Subscription
+
+	query := `
+		SELECT     
+		 id,
+		created_at,
+		email,
+		city,
+		token,
+		frequency,
+		confirmed,
+		last_sent_at
+		FROM subscriptions
+		WHERE token = $1;`
+
+	err := r.db.QueryRowxContext(ctx, query, token).StructScan(&subscription)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Subscription{}, customErrors.ErrSubscriptionNotFound
+		}
+
+		return domain.Subscription{}, err
+	}
+
+	return subscription, nil
 }
 
-func (r *SubscriptionRepo) Update(ctx context.Context, inp UpdateSubscriptionInput) error {
-	return nil
+func (r *SubscriptionRepo) Confirm(ctx context.Context, token string) error {
+	query := "UPDATE subscriptions SET confirmed = true WHERE token = $1;"
+	_, err := r.db.ExecContext(ctx, query, token)
+	return err
+}
+
+func (r *SubscriptionRepo) SetLastSentAt(ctx context.Context, lastSentAt time.Time, token string) error {
+	query := "UPDATE subscriptions SET last_sent_at = $1 WHERE token = $2;"
+	_, err := r.db.ExecContext(ctx, query, lastSentAt, token)
+	return err
 }
 
 func (r *SubscriptionRepo) Delete(ctx context.Context, token string) error {
-	return nil
+	query := "DELETE FROM subscriptions WHERE token = $1;"
+	_, err := r.db.ExecContext(ctx, query, token)
+	return err
 }

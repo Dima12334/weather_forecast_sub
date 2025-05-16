@@ -44,13 +44,35 @@ func (h *Handler) subscribeEmail(c *gin.Context) {
 }
 
 func (h *Handler) confirmEmail(c *gin.Context) {
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "subscription confirmed",
-	})
+	token := c.Param("token")
+
+	err := h.services.Subscriptions.Confirm(c, token)
+	if err != nil {
+		switch {
+		case errors.Is(err, customErrors.ErrSubscriptionNotFound):
+			c.Status(http.StatusNotFound)
+		default:
+			c.Status(http.StatusBadRequest)
+		}
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (h *Handler) unsubscribeEmail(c *gin.Context) {
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "subscription deleted",
-	})
+	token := c.Param("token")
+
+	err := h.services.Subscriptions.Delete(c, token)
+	if err != nil {
+		switch {
+		case errors.Is(err, customErrors.ErrSubscriptionNotFound):
+			c.Status(http.StatusNotFound)
+		default:
+			c.Status(http.StatusBadRequest)
+		}
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

@@ -13,15 +13,9 @@ type CreateSubscriptionInput struct {
 	Frequency string `json:"frequency"`
 }
 
-type UpdateSubscriptionInput struct {
-	ID        string `json:"id"`
-	Token     string `json:"token"`
-	Confirmed bool   `json:"confirmed"`
-}
-
 type Subscription interface {
 	Create(ctx context.Context, inp CreateSubscriptionInput) error
-	Update(ctx context.Context, inp UpdateSubscriptionInput) error
+	Confirm(ctx context.Context, token string) error
 	Delete(ctx context.Context, token string) error
 }
 

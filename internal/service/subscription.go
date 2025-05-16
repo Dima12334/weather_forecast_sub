@@ -35,10 +35,20 @@ func (s *SubscriptionService) Create(ctx context.Context, inp CreateSubscription
 	return err
 }
 
-func (s *SubscriptionService) Update(ctx context.Context, inp UpdateSubscriptionInput) error {
-	return nil
+func (s *SubscriptionService) Confirm(ctx context.Context, token string) error {
+	_, err := s.repo.GetByToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.Confirm(ctx, token)
 }
 
 func (s *SubscriptionService) Delete(ctx context.Context, token string) error {
-	return nil
+	_, err := s.repo.GetByToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.Delete(ctx, token)
 }
