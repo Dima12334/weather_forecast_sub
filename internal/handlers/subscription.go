@@ -9,15 +9,19 @@ import (
 )
 
 type subscribeEmailInput struct {
-	Email     string `json:"email" binding:"required,email,max=255"`
-	City      string `json:"city" binding:"required,max=255"`
-	Frequency string `json:"frequency" binding:"oneof=hourly daily"`
+	Email     string `form:"email" json:"email" binding:"required,email,max=255"`
+	City      string `form:"city" json:"city" binding:"required,max=255"`
+	Frequency string `form:"frequency" json:"frequency" binding:"oneof=hourly daily"`
+}
+
+func (h *Handler) showSubscribePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "subscribe.html", gin.H{})
 }
 
 func (h *Handler) subscribeEmail(c *gin.Context) {
 	var inp subscribeEmailInput
 
-	if err := c.BindJSON(&inp); err != nil {
+	if err := c.ShouldBind(&inp); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
