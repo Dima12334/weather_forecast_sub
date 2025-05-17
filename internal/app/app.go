@@ -16,6 +16,7 @@ import (
 	"weather_forecast_sub/internal/server"
 	"weather_forecast_sub/internal/service"
 	"weather_forecast_sub/pkg/clients"
+	"weather_forecast_sub/pkg/email/smtp"
 	"weather_forecast_sub/pkg/hash"
 	"weather_forecast_sub/pkg/logger"
 )
@@ -59,14 +60,18 @@ func Run(configDir string) {
 	}()
 
 	hasher := hash.NewSHA256Hasher()
+	emailSender := smtp.NewSMTPSender(cfg.SMTP.From, cfg.SMTP.FromName, cfg.SMTP.Pass, cfg.SMTP.Host, cfg.SMTP.Port)
 
 	thirdPartyClients := clients.NewClients(cfg.ThirdParty)
 	repositories := repository.NewRepositories(dbConn)
 	services := service.NewServices(
 		service.Deps{
-			Clients: thirdPartyClients,
-			Repos:   repositories,
-			Hasher:  hasher,
+			Clients:     thirdPartyClients,
+			Repos:       repositories,
+			EmailHasher: hasher,
+			EmailSender: emailSender,
+			EmailConfig: cfg.Email,
+			HTTPConfig:  cfg.HTTP,
 		},
 	)
 	handler := handlers.NewHandler(services)

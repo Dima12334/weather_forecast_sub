@@ -19,11 +19,14 @@ type (
 		Logger     LoggerConfig
 		DB         DatabaseConfig
 		ThirdParty ThirdPartyConfig
+		SMTP       SMTPConfig
+		Email      EmailConfig
 	}
 
 	HTTPConfig struct {
-		Host string `mapstructure:"host"`
-		Port string `mapstructure:"port"`
+		Host   string `mapstructure:"host"`
+		Port   string `mapstructure:"port"`
+		Domain string
 	}
 
 	ThirdPartyConfig struct {
@@ -44,6 +47,29 @@ type (
 		DSN            string
 		MigrationsPath string `mapstructure:"migrationsPath"`
 	}
+
+	SMTPConfig struct {
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		From     string `mapstructure:"from"`
+		FromName string `mapstructure:"from_name"`
+		Pass     string
+	}
+
+	EmailConfig struct {
+		Templates EmailTemplates
+		Subjects  EmailSubjects
+	}
+
+	EmailTemplates struct {
+		Confirmation    string `mapstructure:"confirmation_email"`
+		WeatherForecast string `mapstructure:"weather_forecast"`
+	}
+
+	EmailSubjects struct {
+		Confirmation    string `mapstructure:"confirmation_email"`
+		WeatherForecast string `mapstructure:"weather_forecast"`
+	}
 )
 
 func Init(configDir string) (*Config, error) {
@@ -59,6 +85,8 @@ func Init(configDir string) (*Config, error) {
 	}
 
 	setFormEnv(&cfg)
+
+	cfg.HTTP.Domain = fmt.Sprintf("%s:%s", cfg.HTTP.Host, cfg.HTTP.Port)
 
 	cfg.DB.DSN = fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
@@ -78,6 +106,12 @@ func unmarshalConfig(cfg *Config) error {
 		return err
 	}
 	if err := viper.UnmarshalKey("db", &cfg.DB); err != nil {
+		return err
+	}
+	if err := viper.UnmarshalKey("smtp", &cfg.SMTP); err != nil {
+		return err
+	}
+	if err := viper.UnmarshalKey("email", &cfg.Email); err != nil {
 		return err
 	}
 	return nil
@@ -103,6 +137,8 @@ func setFormEnv(cfg *Config) {
 	cfg.Logger.LoggerEnv = os.Getenv("LOGG_ENV")
 
 	cfg.ThirdParty.WeatherAPIKey = os.Getenv("WEATHER_API_KEY")
+
+	cfg.SMTP.Pass = os.Getenv("SMTP_PASSWORD")
 
 	cfg.DB.Host = os.Getenv("DB_HOST")
 	cfg.DB.Port = os.Getenv("DB_PORT")

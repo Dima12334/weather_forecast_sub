@@ -3,18 +3,38 @@ package service
 import (
 	"context"
 	"time"
+	"weather_forecast_sub/internal/config"
 	"weather_forecast_sub/internal/domain"
 	"weather_forecast_sub/internal/repository"
+	"weather_forecast_sub/pkg/email"
 	"weather_forecast_sub/pkg/hash"
 )
 
 type SubscriptionService struct {
-	repo   repository.SubscriptionRepository
-	hasher hash.EmailHasher
+	repo         repository.SubscriptionRepository
+	hasher       hash.EmailHasher
+	emailSender  email.Sender
+	emailConfig  config.EmailConfig
+	httpConfig   config.HTTPConfig
+	emailService Emails
 }
 
-func NewSubscriptionService(repo repository.SubscriptionRepository, hasher hash.EmailHasher) *SubscriptionService {
-	return &SubscriptionService{repo: repo, hasher: hasher}
+func NewSubscriptionService(
+	repo repository.SubscriptionRepository,
+	hasher hash.EmailHasher,
+	emailSender email.Sender,
+	emailConfig config.EmailConfig,
+	httpConfig config.HTTPConfig,
+	emailService Emails,
+) *SubscriptionService {
+	return &SubscriptionService{
+		repo:         repo,
+		hasher:       hasher,
+		emailSender:  emailSender,
+		emailConfig:  emailConfig,
+		httpConfig:   httpConfig,
+		emailService: emailService,
+	}
 }
 
 func (s *SubscriptionService) Create(ctx context.Context, inp CreateSubscriptionInput) error {
@@ -31,8 +51,11 @@ func (s *SubscriptionService) Create(ctx context.Context, inp CreateSubscription
 	}
 	err := s.repo.Create(ctx, subscription)
 
-	// TODO: send confirmation email
-	return err
+	if err != nil {
+		return err
+	}
+
+	return s.emailService.SendConfirmationEmail(ConfirmationEmailInput{Email: inp.Email, Token: token})
 }
 
 func (s *SubscriptionService) Confirm(ctx context.Context, token string) error {

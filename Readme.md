@@ -9,7 +9,7 @@ The task involves developing a REST API for creating subscriptions on weather up
 You can use Postman [collection](https://www.postman.com/dimchik32/workspace/weather-subscription-service/collection/25524341-d34e28e2-0887-4300-9329-37dd06732ab4?action=share&creator=25524341
 ) to interact with API.
 
-Swagger documentation for API: http://127.0.0.1:8080/swagger/index.html
+Swagger documentation for API: http://localhost:8080/swagger/index.html
 
 ## Usage
 
