@@ -27,7 +27,7 @@ make up-with-build
 make migrate-up
 ```
 5. Done. Use the App.<br>
-You can open http://127.0.0.1:8080/subscribe page and fill out the form.<br>
+You can open http://localhost:8080/subscribe page and fill out the form.<br>
 After that you will receive email with a confirmation link, and after confirmation you will start receiving weather updates.<br>
 You can unsubscribe from the newsletter at any time by using the unsubscribe link in email.<br>
 6. Optionally you can run tests:
