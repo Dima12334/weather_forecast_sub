@@ -74,6 +74,10 @@ func Run(configDir string) {
 			HTTPConfig:  cfg.HTTP,
 		},
 	)
+
+	cronRunner := NewCronRunner(services)
+	cronRunner.Start()
+
 	handler := handlers.NewHandler(services)
 
 	srv := server.NewServer(cfg, handler.Init())

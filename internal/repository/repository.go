@@ -11,8 +11,9 @@ type SubscriptionRepository interface {
 	Create(ctx context.Context, subscription domain.Subscription) error
 	GetByToken(ctx context.Context, token string) (domain.Subscription, error)
 	Confirm(ctx context.Context, token string) error
-	SetLastSentAt(ctx context.Context, lastSentAt time.Time, token string) error
+	SetLastSentAt(lastSentAt time.Time, tokens []string) error
 	Delete(ctx context.Context, token string) error
+	GetConfirmedByFrequency(frequency string) ([]domain.Subscription, error)
 }
 
 type Repositories struct {

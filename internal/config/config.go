@@ -62,8 +62,9 @@ type (
 	}
 
 	EmailTemplates struct {
-		Confirmation    string `mapstructure:"confirmation_email"`
-		WeatherForecast string `mapstructure:"weather_forecast"`
+		Confirmation          string `mapstructure:"confirmation_email"`
+		WeatherForecastDaily  string `mapstructure:"weather_forecast_daily"`
+		WeatherForecastHourly string `mapstructure:"weather_forecast_hourly"`
 	}
 
 	EmailSubjects struct {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"time"
 	"weather_forecast_sub/internal/domain"
 	customErrors "weather_forecast_sub/pkg/errors"
@@ -75,9 +76,9 @@ func (r *SubscriptionRepo) Confirm(ctx context.Context, token string) error {
 	return err
 }
 
-func (r *SubscriptionRepo) SetLastSentAt(ctx context.Context, lastSentAt time.Time, token string) error {
-	query := "UPDATE subscriptions SET last_sent_at = $1 WHERE token = $2;"
-	_, err := r.db.ExecContext(ctx, query, lastSentAt, token)
+func (r *SubscriptionRepo) SetLastSentAt(lastSentAt time.Time, tokens []string) error {
+	query := "UPDATE subscriptions SET last_sent_at = $1 WHERE token = ANY($2);"
+	_, err := r.db.Exec(query, lastSentAt, pq.Array(tokens))
 	return err
 }
 
@@ -85,4 +86,25 @@ func (r *SubscriptionRepo) Delete(ctx context.Context, token string) error {
 	query := "DELETE FROM subscriptions WHERE token = $1;"
 	_, err := r.db.ExecContext(ctx, query, token)
 	return err
+}
+
+func (r *SubscriptionRepo) GetConfirmedByFrequency(frequency string) ([]domain.Subscription, error) {
+	var subscriptions []domain.Subscription
+
+	query := `
+		SELECT     
+		 id,
+		created_at,
+		email,
+		city,
+		token,
+		frequency,
+		confirmed,
+		last_sent_at
+		FROM subscriptions
+		WHERE confirmed = true AND frequency = $1;`
+
+	err := r.db.Select(&subscriptions, query, frequency)
+
+	return subscriptions, err
 }

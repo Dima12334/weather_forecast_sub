@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"weather_forecast_sub/internal/config"
+	"weather_forecast_sub/internal/domain"
 	"weather_forecast_sub/internal/repository"
 	"weather_forecast_sub/pkg/clients"
 	"weather_forecast_sub/pkg/email"
@@ -19,10 +20,14 @@ type Subscription interface {
 	Create(ctx context.Context, inp CreateSubscriptionInput) error
 	Confirm(ctx context.Context, token string) error
 	Delete(ctx context.Context, token string) error
+
+	SendHourlyWeatherForecast() error
+	SendDailyWeatherForecast() error
 }
 
 type Weather interface {
-	GetCurrentWeather(ctx context.Context, city string) (*clients.CurrentWeatherResponse, error)
+	GetCurrentWeather(city string) (*clients.WeatherResponse, error)
+	GetDayWeather(city string) (*clients.DayWeatherResponse, error)
 }
 
 type ConfirmationEmailInput struct {
@@ -30,12 +35,22 @@ type ConfirmationEmailInput struct {
 	Token string
 }
 
-type WeatherForecastEmailInput struct {
+type WeatherForecastDailyEmailInput struct {
+	Subscription domain.Subscription
+	Weather      *clients.DayWeatherResponse
+	Date         string
+}
+
+type WeatherForecastHourlyEmailInput struct {
+	Subscription domain.Subscription
+	Weather      *clients.WeatherResponse
+	Date         string
 }
 
 type Emails interface {
 	SendConfirmationEmail(ConfirmationEmailInput) error
-	SendWeatherForecastEmail(WeatherForecastEmailInput) error
+	SendWeatherForecastDailyEmail(WeatherForecastDailyEmailInput) error
+	SendWeatherForecastHourlyEmail(WeatherForecastHourlyEmailInput) error
 }
 
 type Deps struct {
@@ -54,6 +69,7 @@ type Services struct {
 
 func NewServices(deps Deps) *Services {
 	emailsService := NewEmailsService(deps.EmailSender, deps.EmailConfig, deps.HTTPConfig)
+	weatherService := NewWeatherService(deps.Clients.WeatherAPI)
 	return &Services{
 		Subscriptions: NewSubscriptionService(
 			deps.Repos.Subscription,
@@ -62,7 +78,8 @@ func NewServices(deps Deps) *Services {
 			deps.EmailConfig,
 			deps.HTTPConfig,
 			emailsService,
+			weatherService,
 		),
-		Weather: NewWeatherService(deps.Clients.WeatherAPI),
+		Weather: weatherService,
 	}
 }

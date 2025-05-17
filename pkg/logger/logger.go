@@ -62,3 +62,11 @@ func Error(msg string) {
 func Errorf(msg string, args ...interface{}) {
 	zap.S().Errorf(msg, args)
 }
+
+func Fatal(msg string) {
+	zap.S().Fatal(msg)
+}
+
+func Fatalf(msg string, args ...interface{}) {
+	zap.S().Fatalf(msg, args)
+}

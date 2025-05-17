@@ -4,12 +4,13 @@ import (
 	"weather_forecast_sub/internal/config"
 )
 
-type Weather interface {
-	GetCurrentWeather(city string) (*CurrentWeatherResponse, error)
+type WeatherClient interface {
+	GetAPICurrentWeather(city string) (*WeatherResponse, error)
+	GetAPIDayWeather(city string) (*DayWeatherResponse, error)
 }
 
 type Clients struct {
-	WeatherAPI Weather
+	WeatherAPI WeatherClient
 }
 
 func NewClients(thirdPartyCfg config.ThirdPartyConfig) *Clients {
