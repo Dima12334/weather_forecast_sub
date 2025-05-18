@@ -4,6 +4,8 @@ import (
 	"weather_forecast_sub/internal/config"
 )
 
+//go:generate mockgen -source=clients.go -destination=mocks/mock_clients.go
+
 type WeatherClient interface {
 	GetAPICurrentWeather(city string) (*WeatherResponse, error)
 	GetAPIDayWeather(city string) (*DayWeatherResponse, error)

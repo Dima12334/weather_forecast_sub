@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 )
 
+//go:generate mockgen -source=email.go -destination=mocks/mock_email.go
+
 type EmailHasher interface {
 	GenerateEmailHash(email string) string
 }

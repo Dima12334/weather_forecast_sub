@@ -7,6 +7,8 @@ import (
 	"weather_forecast_sub/internal/domain"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/mock_repository.go
+
 type SubscriptionRepository interface {
 	Create(ctx context.Context, subscription domain.Subscription) error
 	GetByToken(ctx context.Context, token string) (domain.Subscription, error)

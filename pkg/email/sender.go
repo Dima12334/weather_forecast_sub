@@ -13,6 +13,8 @@ type SendEmailInput struct {
 	Body    string
 }
 
+//go:generate mockgen -source=sender.go -destination=mocks/mock_sender.go
+
 type Sender interface {
 	Send(input SendEmailInput) error
 }

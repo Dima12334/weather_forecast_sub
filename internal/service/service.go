@@ -10,6 +10,8 @@ import (
 	"weather_forecast_sub/pkg/hash"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock_service.go
+
 type CreateSubscriptionInput struct {
 	Email     string `json:"email"`
 	City      string `json:"city"`

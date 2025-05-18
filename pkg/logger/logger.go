@@ -7,6 +7,7 @@ import (
 
 const (
 	prodLogEnv = "prod"
+	devLogEnv  = "dev"
 )
 
 func Init(loggerCfg config.LoggerConfig) error {
