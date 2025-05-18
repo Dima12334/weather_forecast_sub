@@ -36,7 +36,8 @@ import (
 
 // Run initializes the whole application.
 func Run(configDir string) {
-	cfg, err := config.Init(configDir)
+	environ := os.Getenv("ENV")
+	cfg, err := config.Init(configDir, environ)
 	if err != nil {
 		log.Fatalf("failed to init configs: %v", err.Error())
 		return

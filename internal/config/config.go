@@ -9,18 +9,21 @@ import (
 )
 
 const (
+	testEnvironment       = "test"
 	defaultHTTPPort       = "8080"
 	defaultMigrationsPath = "file://migrations"
 )
 
 type (
 	Config struct {
-		HTTP       HTTPConfig
-		Logger     LoggerConfig
-		DB         DatabaseConfig
-		ThirdParty ThirdPartyConfig
-		SMTP       SMTPConfig
-		Email      EmailConfig
+		Environment string
+		HTTP        HTTPConfig
+		Logger      LoggerConfig
+		DB          DatabaseConfig
+		TestDB      DatabaseConfig
+		ThirdParty  ThirdPartyConfig
+		SMTP        SMTPConfig
+		Email       EmailConfig
 	}
 
 	HTTPConfig struct {
@@ -73,7 +76,7 @@ type (
 	}
 )
 
-func Init(configDir string) (*Config, error) {
+func Init(configDir, environ string) (*Config, error) {
 	populateDefaults()
 
 	if err := parseConfigFile(configDir); err != nil {
@@ -81,6 +84,9 @@ func Init(configDir string) (*Config, error) {
 	}
 
 	var cfg Config
+
+	cfg.Environment = environ
+
 	if err := unmarshalConfig(&cfg); err != nil {
 		return nil, err
 	}
@@ -97,6 +103,16 @@ func Init(configDir string) (*Config, error) {
 		cfg.DB.Port,
 		cfg.DB.DBName,
 		cfg.DB.SSLMode,
+	)
+
+	cfg.TestDB.DSN = fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		cfg.TestDB.User,
+		cfg.TestDB.Password,
+		cfg.TestDB.Host,
+		cfg.TestDB.Port,
+		cfg.TestDB.DBName,
+		cfg.TestDB.SSLMode,
 	)
 
 	return &cfg, nil
@@ -130,7 +146,13 @@ func parseConfigFile(configDir string) error {
 }
 
 func setFormEnv(cfg *Config) {
-	err := godotenv.Load()
+	var err error
+	if cfg.Environment == testEnvironment {
+		err = godotenv.Load("../.env")
+	} else {
+		err = godotenv.Load()
+	}
+
 	if err != nil {
 		log.Fatalf("error loading .env file")
 	}
@@ -147,6 +169,13 @@ func setFormEnv(cfg *Config) {
 	cfg.DB.Password = os.Getenv("DB_PASSWORD")
 	cfg.DB.DBName = os.Getenv("DB_NAME")
 	cfg.DB.SSLMode = os.Getenv("DB_SSLMODE")
+
+	cfg.TestDB.Host = os.Getenv("TEST_DB_HOST")
+	cfg.TestDB.Port = os.Getenv("TEST_DB_PORT")
+	cfg.TestDB.User = os.Getenv("TEST_DB_USER")
+	cfg.TestDB.Password = os.Getenv("TEST_DB_PASSWORD")
+	cfg.TestDB.DBName = os.Getenv("TEST_DB_NAME")
+	cfg.TestDB.SSLMode = os.Getenv("TEST_DB_SSLMODE")
 }
 
 func populateDefaults() {

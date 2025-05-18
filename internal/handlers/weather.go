@@ -14,7 +14,7 @@ type weatherResponse struct {
 	Description string  `json:"description"`
 }
 
-// getWeather godoc
+// GetWeather godoc
 // @Summary Get current weather for a city
 // @Description Returns the current weather forecast for the specified city using WeatherAPI.com.
 // @Tags weather
@@ -25,7 +25,7 @@ type weatherResponse struct {
 // @Failure 400 "Invalid request"
 // @Failure 404 "City not found"
 // @Router /weather [get]
-func (h *Handler) getWeather(c *gin.Context) {
+func (h *Handler) GetWeather(c *gin.Context) {
 	city := c.Query("city")
 	if city == "" {
 		c.Status(http.StatusBadRequest)

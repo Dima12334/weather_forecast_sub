@@ -12,7 +12,8 @@ import (
 const configsDir = "configs"
 
 func main() {
-	cfg, err := config.Init(configsDir)
+	environ := os.Getenv("ENV")
+	cfg, err := config.Init(configsDir, environ)
 	if err != nil {
 		log.Fatalf("failed to init configs: %v", err.Error())
 	}

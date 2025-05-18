@@ -14,11 +14,11 @@ type subscribeEmailInput struct {
 	Frequency string `form:"frequency" json:"frequency" binding:"oneof=hourly daily"`
 }
 
-func (h *Handler) showSubscribePage(c *gin.Context) {
+func (h *Handler) ShowSubscribePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "subscribe.html", gin.H{})
 }
 
-// subscribeEmail godoc
+// SubscribeEmail godoc
 // @Summary Subscribe to weather updates
 // @Description Subscribe an email to receive weather updates for a specific city with chosen frequency.
 // @Tags subscription
@@ -32,7 +32,7 @@ func (h *Handler) showSubscribePage(c *gin.Context) {
 // @Failure 400 "Invalid input"
 // @Failure 409 "Email already subscribed"
 // @Router /subscribe [post]
-func (h *Handler) subscribeEmail(c *gin.Context) {
+func (h *Handler) SubscribeEmail(c *gin.Context) {
 	var inp subscribeEmailInput
 
 	if err := c.ShouldBind(&inp); err != nil {
@@ -61,7 +61,7 @@ func (h *Handler) subscribeEmail(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// confirmEmail godoc
+// ConfirmEmail godoc
 // @Summary Confirm email subscription
 // @Description Confirms a subscription using the token sent in the confirmation email.
 // @Tags subscription
@@ -72,7 +72,7 @@ func (h *Handler) subscribeEmail(c *gin.Context) {
 // @Failure 400 "Invalid token"
 // @Failure 404 "Token not found"
 // @Router /confirm/{token} [get]
-func (h *Handler) confirmEmail(c *gin.Context) {
+func (h *Handler) ConfirmEmail(c *gin.Context) {
 	token := c.Param("token")
 
 	err := h.services.Subscriptions.Confirm(c, token)
@@ -89,7 +89,7 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// unsubscribeEmail godoc
+// UnsubscribeEmail godoc
 // @Summary Unsubscribe from weather updates
 // @Description Unsubscribes an email from weather updates using the token sent in emails.
 // @Tags subscription
@@ -100,7 +100,7 @@ func (h *Handler) confirmEmail(c *gin.Context) {
 // @Failure 400 "Invalid token"
 // @Failure 404 "Token not found"
 // @Router /unsubscribe/{token} [get]
-func (h *Handler) unsubscribeEmail(c *gin.Context) {
+func (h *Handler) UnsubscribeEmail(c *gin.Context) {
 	token := c.Param("token")
 
 	err := h.services.Subscriptions.Delete(c, token)

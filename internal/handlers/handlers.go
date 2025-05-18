@@ -36,13 +36,20 @@ func (h *Handler) Init() *gin.Engine {
 }
 
 func (h *Handler) initApi(router *gin.Engine) {
-	router.GET("/subscribe", h.showSubscribePage)
+	router.GET("/subscribe", h.ShowSubscribePage)
 
 	api := router.Group("/api")
 	{
-		api.GET("/weather", h.getWeather)
-		api.POST("/subscribe", h.subscribeEmail)
-		api.GET("/confirm/:token", h.confirmEmail)
-		api.GET("/unsubscribe/:token", h.unsubscribeEmail)
+		weather := api.Group("/weather")
+		{
+			weather.GET("/", h.GetWeather)
+		}
+
+		subscription := api.Group("")
+		{
+			subscription.POST("/subscribe", h.SubscribeEmail)
+			subscription.GET("/confirm/:token", h.ConfirmEmail)
+			subscription.GET("/unsubscribe/:token", h.UnsubscribeEmail)
+		}
 	}
 }
