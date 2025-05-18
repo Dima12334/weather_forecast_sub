@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"weather_forecast_sub/internal/service"
 	customErrors "weather_forecast_sub/pkg/errors"
+	"weather_forecast_sub/pkg/hash"
 )
 
 type subscribeEmailInput struct {
@@ -75,6 +76,11 @@ func (h *Handler) SubscribeEmail(c *gin.Context) {
 func (h *Handler) ConfirmEmail(c *gin.Context) {
 	token := c.Param("token")
 
+	if !hash.IsValidSHA256Hex(token) {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	err := h.services.Subscriptions.Confirm(c, token)
 	if err != nil {
 		switch {
@@ -102,6 +108,11 @@ func (h *Handler) ConfirmEmail(c *gin.Context) {
 // @Router /unsubscribe/{token} [get]
 func (h *Handler) UnsubscribeEmail(c *gin.Context) {
 	token := c.Param("token")
+
+	if !hash.IsValidSHA256Hex(token) {
+		c.Status(http.StatusBadRequest)
+		return
+	}
 
 	err := h.services.Subscriptions.Delete(c, token)
 	if err != nil {

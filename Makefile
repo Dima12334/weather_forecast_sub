@@ -7,9 +7,6 @@ up-with-build:
 down:
 	docker-compose down
 
-test:
-	docker-compose exec app go test -v ./...
-
 migration:
 	@migrate create -ext sql -dir ./migrations -seq $(filter-out $@,$(MAKECMDGOALS))
 
@@ -18,6 +15,9 @@ migrate-up:
 
 migrate-down:
 	@docker-compose exec app go run cmd/migrate/main.go down
+
+test:
+	go test -v ./...
 
 swag:
 	swag init -g internal/app/app.go
