@@ -79,7 +79,7 @@ type (
 func Init(configDir, environ string) (*Config, error) {
 	populateDefaults()
 
-	if err := parseConfigFile(configDir); err != nil {
+	if err := parseConfigFile(configDir, environ); err != nil {
 		return nil, err
 	}
 
@@ -125,6 +125,9 @@ func unmarshalConfig(cfg *Config) error {
 	if err := viper.UnmarshalKey("db", &cfg.DB); err != nil {
 		return err
 	}
+	if err := viper.UnmarshalKey("db", &cfg.TestDB); err != nil {
+		return err
+	}
 	if err := viper.UnmarshalKey("smtp", &cfg.SMTP); err != nil {
 		return err
 	}
@@ -134,8 +137,12 @@ func unmarshalConfig(cfg *Config) error {
 	return nil
 }
 
-func parseConfigFile(configDir string) error {
-	viper.SetConfigName("main")
+func parseConfigFile(configDir, environ string) error {
+	if environ == testEnvironment {
+		viper.SetConfigName("test")
+	} else {
+		viper.SetConfigName("main")
+	}
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(configDir)
 

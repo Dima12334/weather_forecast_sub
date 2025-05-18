@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	testEnvironment    = "test"
-	configsDir         = "../configs"
-	MigrationsPathTest = "file://../migrations"
+	testEnvironment = "test"
+	configsDir      = "../configs"
 )
 
 var testDB *sqlx.DB
@@ -23,7 +22,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("failed to init configs: %v", err.Error())
 	}
 
-	err = migrations.ApplyMigrations(cfg.TestDB.DSN, MigrationsPathTest, "up")
+	err = migrations.ApplyMigrations(cfg.TestDB.DSN, cfg.TestDB.MigrationsPath, "up")
 	if err != nil {
 		log.Fatalf("Failed to apply migrations: %v", err)
 	}
@@ -36,7 +35,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	if err := migrations.ApplyMigrations(cfg.TestDB.DSN, MigrationsPathTest, "down"); err != nil {
+	if err := migrations.ApplyMigrations(cfg.TestDB.DSN, cfg.TestDB.MigrationsPath, "down"); err != nil {
 		log.Printf("Failed to rollback migrations: %v", err)
 	}
 

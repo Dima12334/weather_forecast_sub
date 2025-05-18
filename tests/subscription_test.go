@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
-	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,9 +20,9 @@ import (
 
 func TestSubscribeEmail(t *testing.T) {
 	t.Run("Show subscribe page", testShowSubscribePageMocked)
-	t.Run("Successful subscription", testSuccessfulSubscription)
-	t.Run("Invalid request body", testInvalidRequestBody)
-	t.Run("Duplicate subscription", testDuplicateSubscription)
+	t.Run("Successful subscription", testSuccessfulSubscribe)
+	t.Run("Invalid request body", testInvalidSubscribeRequestBody)
+	t.Run("Duplicate subscription", testDuplicateSubscribe)
 	t.Run("Unsubscribe success", testUnsubscribeSuccess)
 	t.Run("Unsubscribe not found", testUnsubscribeNotFound)
 	t.Run("Confirm success", testConfirmSuccess)
@@ -31,9 +30,7 @@ func TestSubscribeEmail(t *testing.T) {
 	t.Run("Confirm invalid token", testConfirmInvalidToken)
 }
 
-func setupTestEnvironment(t *testing.T, ctrl *gomock.Controller) (*gin.Engine, *mockService.MockEmails, func()) {
-	mockEmailService := mockService.NewMockEmails(ctrl)
-
+func setupTestEnvironment(t *testing.T, ctrl *gomock.Controller) (*gin.Engine, *mockSender.MockSender, func()) {
 	repo := repository.NewSubscriptionRepo(testDB)
 	hasher := hash.NewSHA256Hasher()
 	cfg, err := config.Init(configsDir, testEnvironment)
@@ -42,6 +39,7 @@ func setupTestEnvironment(t *testing.T, ctrl *gomock.Controller) (*gin.Engine, *
 	}
 
 	mockEmailSender := mockSender.NewMockSender(ctrl)
+	emailsService := service.NewEmailsService(mockEmailSender, cfg.Email, cfg.HTTP)
 	mockWeatherService := mockService.NewMockWeather(ctrl)
 
 	subService := service.NewSubscriptionService(
@@ -50,7 +48,7 @@ func setupTestEnvironment(t *testing.T, ctrl *gomock.Controller) (*gin.Engine, *
 		mockEmailSender,
 		cfg.Email,
 		cfg.HTTP,
-		mockEmailService,
+		emailsService,
 		mockWeatherService,
 	)
 	services := &service.Services{Subscriptions: subService}
@@ -59,19 +57,19 @@ func setupTestEnvironment(t *testing.T, ctrl *gomock.Controller) (*gin.Engine, *
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.GET("/subscribe", handler.ShowSubscribePage)
 	router.POST("/api/subscribe", handler.SubscribeEmail)
 	router.GET("/api/confirm/:token", handler.ConfirmEmail)
 	router.GET("/api/unsubscribe/:token", handler.UnsubscribeEmail)
 
 	// Create router with mock template
-	router.GET("/subscribe", handler.ShowSubscribePage)
-	router.SetHTMLTemplate(template.Must(template.New("subscribe.html").Parse("Mock Template")))
+	router.LoadHTMLGlob("../templates/**/*.html")
 
 	cleanup := func() {
 		testDB.Exec(`DELETE FROM subscriptions;`)
 	}
 
-	return router, mockEmailService, cleanup
+	return router, mockEmailSender, cleanup
 }
 
 func testShowSubscribePageMocked(t *testing.T) {
@@ -88,21 +86,21 @@ func testShowSubscribePageMocked(t *testing.T) {
 	handler.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "Mock Template", w.Body.String())
+	assert.Contains(t, w.Body.String(), "Subscribe to Weather updates")
 }
 
-func testSuccessfulSubscription(t *testing.T) {
+func testSuccessfulSubscribe(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	// Setup
-	handler, mockEmailService, cleanup := setupTestEnvironment(t, ctrl)
+	handler, mockEmailSender, cleanup := setupTestEnvironment(t, ctrl)
 	defer cleanup()
 
 	// Mock expectations
-	mockEmailService.
+	mockEmailSender.
 		EXPECT().
-		SendConfirmationEmail(gomock.Any()).
+		Send(gomock.Any()).
 		Return(nil)
 
 	// Execute
@@ -131,7 +129,7 @@ func testSuccessfulSubscription(t *testing.T) {
 	assert.False(t, sub.Confirmed, "subscription should not be confirmed yet")
 }
 
-func testInvalidRequestBody(t *testing.T) {
+func testInvalidSubscribeRequestBody(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -141,7 +139,8 @@ func testInvalidRequestBody(t *testing.T) {
 
 	// Execute
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/api/subscribe", bytes.NewBufferString(`{}`))
+	req := httptest.NewRequest("POST", "/api/subscribe", bytes.NewBufferString(
+		`{"email": "test@example.com", "city": "Kyiv", "frequency": "wrong_frequency"}`))
 	req.Header.Set("Content-Type", "application/json")
 
 	handler.ServeHTTP(w, req)
@@ -160,7 +159,7 @@ func testInvalidRequestBody(t *testing.T) {
 	assert.Equal(t, 0, count, "no record should be created for invalid request")
 }
 
-func testDuplicateSubscription(t *testing.T) {
+func testDuplicateSubscribe(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
