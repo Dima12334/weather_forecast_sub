@@ -18,7 +18,7 @@ import (
 	"weather_forecast_sub/pkg/hash"
 )
 
-func TestSubscribeEmail(t *testing.T) {
+func TestSubscription(t *testing.T) {
 	t.Run("Show subscribe page", testShowSubscribePageMocked)
 	t.Run("Successful subscription", testSuccessfulSubscribe)
 	t.Run("Invalid request body", testInvalidSubscribeRequestBody)

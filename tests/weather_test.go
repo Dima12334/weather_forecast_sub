@@ -16,7 +16,7 @@ import (
 	customErrors "weather_forecast_sub/pkg/errors"
 )
 
-func TestHandler_GetWeather(t *testing.T) {
+func TestWeather(t *testing.T) {
 	t.Run("Successful weather request", testSuccessfulWeatherRequest)
 	t.Run("Empty city parameter", testEmptyCityParameter)
 	t.Run("City not found", testCityNotFound)
