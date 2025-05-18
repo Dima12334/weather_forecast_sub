@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_HOST_PORT}:${DB_PORT}"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -31,7 +31,7 @@ services:
       POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
       POSTGRES_DB: ${TEST_DB_NAME}
     ports:
-      - "${TEST_DB_HOST_PORT}:${TEST_DB_PORT}"
+      - "${TEST_DB_PORT}:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
 
