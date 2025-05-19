@@ -10,6 +10,7 @@ import (
 
 const (
 	testEnvironment       = "test"
+	devEnvironment        = "dev"
 	defaultHTTPPort       = "8080"
 	defaultMigrationsPath = "file://migrations"
 )
@@ -156,7 +157,7 @@ func setFormEnv(cfg *Config) {
 	var err error
 	if cfg.Environment == testEnvironment {
 		err = godotenv.Load("../.env")
-	} else {
+	} else if cfg.Environment == devEnvironment {
 		err = godotenv.Load()
 	}
 
