@@ -11,6 +11,7 @@ import (
 const (
 	testEnvironment       = "test"
 	devEnvironment        = "dev"
+	prodEnvironment       = "prod"
 	defaultHTTPPort       = "8080"
 	defaultMigrationsPath = "file://migrations"
 )
@@ -28,9 +29,11 @@ type (
 	}
 
 	HTTPConfig struct {
-		Host   string `mapstructure:"host"`
-		Port   string `mapstructure:"port"`
-		Domain string
+		Host    string `mapstructure:"host"`
+		Port    string `mapstructure:"port"`
+		Scheme  string
+		Domain  string
+		BaseURL string
 	}
 
 	ThirdPartyConfig struct {
@@ -94,7 +97,14 @@ func Init(configDir, environ string) (*Config, error) {
 
 	setFormEnv(&cfg)
 
-	cfg.HTTP.Domain = fmt.Sprintf("%s:%s", cfg.HTTP.Host, cfg.HTTP.Port)
+	if environ == prodEnvironment {
+		cfg.HTTP.Scheme = "https"
+		cfg.HTTP.Domain = cfg.HTTP.Host
+	} else {
+		cfg.HTTP.Scheme = "http"
+		cfg.HTTP.Domain = fmt.Sprintf("%s:%s", cfg.HTTP.Host, cfg.HTTP.Port)
+	}
+	cfg.HTTP.BaseURL = fmt.Sprintf("%s://%s", cfg.HTTP.Scheme, cfg.HTTP.Domain)
 
 	cfg.DB.DSN = fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
@@ -168,6 +178,8 @@ func setFormEnv(cfg *Config) {
 	cfg.Logger.LoggerEnv = os.Getenv("LOGG_ENV")
 
 	cfg.ThirdParty.WeatherAPIKey = os.Getenv("WEATHER_API_KEY")
+
+	cfg.HTTP.Host = os.Getenv("HTTP_HOST")
 
 	cfg.SMTP.Pass = os.Getenv("SMTP_PASSWORD")
 

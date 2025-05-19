@@ -10,7 +10,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "weatherapi.app",
+    "host": "weather-forecast-sub-app.onrender.com",
     "basePath": "/api",
     "paths": {
         "/confirm/{token}": {

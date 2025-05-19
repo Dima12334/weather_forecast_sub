@@ -57,11 +57,11 @@ func (s *EmailService) SendConfirmationEmail(inp ConfirmationEmailInput) error {
 }
 
 func (s *EmailService) createConfirmationLink(token string) string {
-	return fmt.Sprintf("http://%s/api/confirm/%s", s.httpConfig.Domain, token)
+	return fmt.Sprintf("%s/api/confirm/%s", s.httpConfig.BaseURL, token)
 }
 
 func (s *EmailService) createUnsubscribeLink(token string) string {
-	return fmt.Sprintf("http://%s/api/unsubscribe/%s", s.httpConfig.Domain, token)
+	return fmt.Sprintf("%s/api/unsubscribe/%s", s.httpConfig.BaseURL, token)
 }
 
 func (s *EmailService) SendWeatherForecastDailyEmail(inp WeatherForecastDailyEmailInput) error {

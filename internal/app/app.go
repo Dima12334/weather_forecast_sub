@@ -24,7 +24,7 @@ import (
 // @title Weather Forecast API
 // @version 1.0
 // @description Weather API application that allows users to subscribe to weather updates for their city.
-// @host weatherapi.app
+// @host weather-forecast-sub-app.onrender.com
 // @BasePath /api
 // @schemes http https
 
