@@ -21,6 +21,10 @@ import (
 	"weather_forecast_sub/pkg/logger"
 )
 
+const (
+	devEnvironment = "dev"
+)
+
 // @title Weather Forecast API
 // @version 1.0
 // @description Weather API application that allows users to subscribe to weather updates for their city.
@@ -37,6 +41,10 @@ import (
 // Run initializes the whole application.
 func Run(configDir string) {
 	environ := os.Getenv("ENV")
+	if environ == "" {
+		environ = devEnvironment
+	}
+
 	cfg, err := config.Init(configDir, environ)
 	if err != nil {
 		log.Fatalf("failed to init configs: %v", err.Error())

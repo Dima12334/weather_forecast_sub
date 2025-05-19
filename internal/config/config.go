@@ -97,7 +97,7 @@ func Init(configDir, environ string) (*Config, error) {
 
 	setFormEnv(&cfg)
 
-	if environ == prodEnvironment {
+	if cfg.Environment == prodEnvironment {
 		cfg.HTTP.Scheme = "https"
 		cfg.HTTP.Domain = cfg.HTTP.Host
 	} else {
@@ -165,9 +165,15 @@ func parseConfigFile(configDir, environ string) error {
 
 func setFormEnv(cfg *Config) {
 	var err error
-	if cfg.Environment == testEnvironment {
+
+	switch cfg.Environment {
+	case testEnvironment:
 		err = godotenv.Load("../.env")
-	} else if cfg.Environment == devEnvironment {
+	case devEnvironment:
+		err = godotenv.Load()
+	case prodEnvironment:
+		// Do nothing
+	default:
 		err = godotenv.Load()
 	}
 
