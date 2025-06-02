@@ -2,6 +2,7 @@ package logger
 
 import (
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"weather_forecast_sub/internal/config"
 )
 
@@ -19,6 +20,7 @@ func Init(loggerCfg config.LoggerConfig) error {
 		cfg = zap.NewDevelopmentConfig()
 	}
 
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	cfg.DisableStacktrace = true
 
 	baseLogger, err := cfg.Build()
@@ -37,7 +39,7 @@ func Debug(msg string) {
 }
 
 func Debugf(msg string, args ...interface{}) {
-	zap.S().Debugf(msg, args)
+	zap.S().Debugf(msg, args...)
 }
 
 func Info(msg string) {
@@ -45,7 +47,7 @@ func Info(msg string) {
 }
 
 func Infof(msg string, args ...interface{}) {
-	zap.S().Infof(msg, args)
+	zap.S().Infof(msg, args...)
 }
 
 func Warn(msg string) {
@@ -53,7 +55,7 @@ func Warn(msg string) {
 }
 
 func Warnf(msg string, args ...interface{}) {
-	zap.S().Warnf(msg, args)
+	zap.S().Warnf(msg, args...)
 }
 
 func Error(msg string) {
@@ -61,7 +63,7 @@ func Error(msg string) {
 }
 
 func Errorf(msg string, args ...interface{}) {
-	zap.S().Errorf(msg, args)
+	zap.S().Errorf(msg, args...)
 }
 
 func Fatal(msg string) {
@@ -69,5 +71,5 @@ func Fatal(msg string) {
 }
 
 func Fatalf(msg string, args ...interface{}) {
-	zap.S().Fatalf(msg, args)
+	zap.S().Fatalf(msg, args...)
 }

@@ -10,6 +10,10 @@ import (
 	"weather_forecast_sub/pkg/logger"
 )
 
+const (
+	weatherAPICityNotFoundCode = 1006
+)
+
 type WeatherAPIClient struct {
 	APIKey     string
 	BaseURL    string
@@ -84,11 +88,11 @@ func (c *WeatherAPIClient) GetAPICurrentWeather(city string) (*WeatherResponse, 
 	if resp.StatusCode != http.StatusOK {
 		var apiErr weatherAPIErrorResponse
 		if err = json.NewDecoder(resp.Body).Decode(&apiErr); err == nil {
-			if resp.StatusCode == http.StatusBadRequest && apiErr.Error.Code == 1006 {
+			if resp.StatusCode == http.StatusBadRequest && apiErr.Error.Code == weatherAPICityNotFoundCode {
 				return nil, customErrors.ErrCityNotFound
 			}
 			logger.Errorf(
-				"WeatherAPI error. Status code: %d, api code %d, message %s",
+				"WeatherAPI error. Status code: %d, api code: %d, message: %s",
 				resp.StatusCode,
 				apiErr.Error.Code,
 				apiErr.Error.Message,
@@ -126,10 +130,10 @@ func (c *WeatherAPIClient) GetAPIDayWeather(city string) (*DayWeatherResponse, e
 	if resp.StatusCode != http.StatusOK {
 		var apiErr weatherAPIErrorResponse
 		if err = json.NewDecoder(resp.Body).Decode(&apiErr); err == nil {
-			if resp.StatusCode == http.StatusBadRequest && apiErr.Error.Code == 1006 {
+			if resp.StatusCode == http.StatusBadRequest && apiErr.Error.Code == weatherAPICityNotFoundCode {
 				return nil, customErrors.ErrCityNotFound
 			}
-			logger.Errorf("WeatherAPI error. Status code: %d, api code %d, message %s", resp.StatusCode, apiErr.Error.Code, apiErr.Error.Message)
+			logger.Errorf("WeatherAPI error. Status code: %d, api code: %d, message: %s", resp.StatusCode, apiErr.Error.Code, apiErr.Error.Message)
 			return nil, customErrors.ErrWeatherAPIError
 		}
 		logger.Errorf("WeatherAPI error. Status code: %d", resp.StatusCode)
